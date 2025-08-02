@@ -11,7 +11,7 @@ import { writeFile } from "fs/promises";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const browser = await puppeteer.launch({ headless: false });
+const browser = await puppeteer.launch({ headless: true });
 const page = await browser.newPage();
 
 await page.goto("https://suap.ifpb.edu.br/accounts/login/?next=/");
