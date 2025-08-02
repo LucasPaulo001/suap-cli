@@ -24,7 +24,7 @@ npm install
 
 Após baixar as dependências inicie o projeto:
 ```bash
-node src/app.mjs
+node src/index.mjs
 ```
 ---
 ## 🔒 Segurança e Privacidade
