@@ -1,0 +1,25 @@
+{
+  "name": "suap-cli",
+  "version": "1.0.0",
+  "description": "Captura de dados e organização em arquivos externos",
+  "homepage": "https://github.com/LucasPaulo001/suap-cli#readme",
+  "bugs": {
+    "url": "https://github.com/LucasPaulo001/suap-cli/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LucasPaulo001/suap-cli.git"
+  },
+  "license": "MIT",
+  "author": "Lucas Paulo",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "inquirer": "^12.9.0",
+    "puppeteer": "^24.15.0"
+  }
+}
