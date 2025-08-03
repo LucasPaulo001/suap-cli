@@ -7,7 +7,7 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const browser = await puppeteer.launch({ headless: true});
+const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
 const page = await browser.newPage();
 
 await page.goto("https://suap.ifpb.edu.br/accounts/login/?next=/");
