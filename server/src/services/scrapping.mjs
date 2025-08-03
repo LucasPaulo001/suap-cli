@@ -1,6 +1,5 @@
 import puppeteer from "puppeteer";
 import { existsSync } from "fs";
-import { mkdir } from "fs/promises";
 import { comparePass, hash } from "./hashPass.mjs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -92,6 +91,8 @@ const getDataAcademy = async (table) => {
 
       if (cols.length < 12 || cols[0].toLowerCase() === "total") continue;
 
+      const linkNotas = row.querySelector("a.popup")?.getAttribute("href") || null;
+
       results.push({
         diario: cols[0],
         disciplina: cols[1],
@@ -105,11 +106,62 @@ const getDataAcademy = async (table) => {
         NAF: cols[9],
         MFD: cols[10],
         conceito: cols[11],
+        detalhesLink: linkNotas
       });
     }
 
     return results;
-  })
+  });
+
+  for (let i = 0; i < tableData.length; i++) {
+  const disciplina = tableData[i];
+  if (!disciplina.detalhesLink) continue;
+
+  try {
+    // Busca a linha de volta no DOM usando um seletor baseado no nome da disciplina
+    const rows = await page.$$('table.borda tbody tr');
+
+    const row = rows.find(async (tr) => {
+      const text = await tr.evaluate((el) => el.innerText);
+      return text.includes(disciplina.disciplina);
+    });
+
+    if (!row) throw new Error("Linha da disciplina não encontrada.");
+
+    const link = await row.$('a.popup');
+    if (!link) throw new Error("Link da disciplina não encontrado.");
+
+    await Promise.all([
+      link.click(),
+      page.waitForSelector('table.borda', { timeout: 5000 }),
+    ]);
+
+    const notasDetalhadas = await page.$$eval('table.borda tbody tr', (rows) =>
+      rows.map((row) => {
+        const cols = Array.from(row.querySelectorAll('td')).map((td) =>
+          td.innerText.trim()
+        );
+        return {
+          sigla: cols[0],
+          tipo: cols[1],
+          descricao: cols[2],
+          peso: cols[3],
+          nota: cols[4],
+          data: cols[5],
+        };
+      })
+    );
+
+    disciplina.notas = notasDetalhadas;
+    await page.keyboard.press('Escape');
+    await new Promise((res) => setTimeout(res, 500));
+  } catch (err) {
+    console.error(`Erro ao acessar modal da disciplina ${disciplina.disciplina}:`, err.message);
+    disciplina.notas = [];
+  }
+
+}
+
   console.log("Boletim gerado com sucesso!")
   return tableData
 }
