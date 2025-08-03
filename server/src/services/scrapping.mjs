@@ -1,36 +1,21 @@
 import puppeteer from "puppeteer";
-import inquirer from "inquirer";
 import { existsSync } from "fs";
 import { mkdir } from "fs/promises";
-import { comparePass, hash } from "./services/hashPass.mjs";
+import { comparePass, hash } from "./hashPass.mjs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { writeFile } from "fs/promises";
-
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const browser = await puppeteer.launch({ headless: true });
+const browser = await puppeteer.launch({ headless: true});
 const page = await browser.newPage();
 
 await page.goto("https://suap.ifpb.edu.br/accounts/login/?next=/");
 
-const main = async () => {
-    const answers = await inquirer.prompt([
-        {
-            type: "input",
-            name: "user",
-            message: "Informe o usuário (matrícula):"
-        },
-        {
-            type: "password",
-            name: "password",
-            message: "Informe a senha (esta será a senha para login e validação futura):"
-        }
-    ]);
+export const main = async (user, password) => {
 
-    const pass = answers.password;
+    const pass = password;
 
     const senhaPath = path.join(__dirname, "../pass_backup/senha-segura.hash");
     if (!existsSync(senhaPath)) {
@@ -46,7 +31,7 @@ const main = async () => {
         }
     }
 
-    await page.type("#id_username", answers.user);
+    await page.type("#id_username", user);
     await page.type("#id_password", pass);
 
     await Promise.all([
@@ -69,7 +54,10 @@ const main = async () => {
         await goData("#link-1-meus-dados", 'a[data-tab="boletim"]');
 
         console.log("✅ Navegou para boletins!");
-        await getDataAcademy("table.borda");
+        const boletim = await getDataAcademy("table.borda");
+        await browser.close();
+
+        return boletim;
     }
     catch (err) {
         console.log("❌ Falha ao navegar para boletins:", err.message);
@@ -122,13 +110,6 @@ const getDataAcademy = async (table) => {
 
     return results;
   })
-
-  const dirData = path.join(__dirname, "../boletim");
-  await mkdir(dirData, { recursive: true });
-
-  const filePath = path.join(dirData, "Boletim.json")
-  await writeFile(filePath, JSON.stringify(tableData, null, 2));
-  console.log("✅ Boletim salvo como boletim.json");
+  console.log("Boletim gerado com sucesso!")
+  return tableData
 }
-
-await main();
