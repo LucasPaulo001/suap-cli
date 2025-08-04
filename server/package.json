@@ -16,7 +16,8 @@
   "main": "app.mjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon src/index.mjs"
+    "dev": "nodemon src/index.mjs",
+    "postinstall": "npx puppeteer browsers install chrome"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
